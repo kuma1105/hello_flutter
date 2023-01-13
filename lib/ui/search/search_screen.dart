@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hello_flutter/data/model/photo.dart';
 import 'package:hello_flutter/ui/search/search_view_model.dart';
+import 'package:provider/provider.dart';
 
 // Alt + Enter
 class SearchScreen extends StatefulWidget {
@@ -11,10 +11,8 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final viewModel = SearchViewModel();
-
   final textController = TextEditingController();
-  
+
   @override
   void dispose() {
     textController.dispose(); // 메모리 누수 방지
@@ -23,6 +21,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<SearchViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -51,17 +51,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () async {
-                    setState(() {
-                      viewModel.isLoading = true;
-                    });
-
                     print('확인! : ${textController.text}');
-                    await viewModel.search('아이유');
-
-                    // 렌더링 다시하기
-                    setState(() {
-                      viewModel.isLoading = false;
-                    });
+                    await viewModel.search(textController.text);
                   },
                 ),
                 suffixStyle: TextStyle(color: Colors.green),

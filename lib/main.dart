@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hello_flutter/ui/search/search_screen.dart';
+import 'package:hello_flutter/ui/search/search_view_model.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => SearchViewModel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -26,6 +33,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<SearchViewModel>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('UI 연습')),
       body: SingleChildScrollView(
@@ -58,7 +67,8 @@ class HomeScreen extends StatelessWidget {
       children: [
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Column의 cross는 좌우, Row의 cross는 상하
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // Column의 cross는 좌우, Row의 cross는 상하
             children: [
               const Text(
                 '제목',
