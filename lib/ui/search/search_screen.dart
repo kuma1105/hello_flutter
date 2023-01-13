@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_flutter/data/model/photo.dart';
+import 'package:hello_flutter/ui/search/search_view_model.dart';
 
 // Alt + Enter
 class SearchScreen extends StatefulWidget {
@@ -10,24 +11,15 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  List<Photo> photos = [
-    Photo(
-        url:
-            'https://play-lh.googleusercontent.com/MQDfTBh4VBrD4MQt5hX4b26OnGb9l57_pBWaBFw-mvfrfwOY9aHcwgF2mtDKvE0W-Bw',
-        description: 'KFC'),
-    Photo(
-        url:
-        'https://play-lh.googleusercontent.com/MQDfTBh4VBrD4MQt5hX4b26OnGb9l57_pBWaBFw-mvfrfwOY9aHcwgF2mtDKvE0W-Bw',
-        description: 'KFC'),
-    Photo(
-        url:
-        'https://play-lh.googleusercontent.com/MQDfTBh4VBrD4MQt5hX4b26OnGb9l57_pBWaBFw-mvfrfwOY9aHcwgF2mtDKvE0W-Bw',
-        description: 'KFC'),
-    Photo(
-        url:
-        'https://play-lh.googleusercontent.com/MQDfTBh4VBrD4MQt5hX4b26OnGb9l57_pBWaBFw-mvfrfwOY9aHcwgF2mtDKvE0W-Bw',
-        description: 'KFC'),
-  ];
+  final viewModel = SearchViewModel();
+
+  final textController = TextEditingController();
+  
+  @override
+  void dispose() {
+    textController.dispose(); // 메모리 누수 방지
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           children: [
             TextField(
+              controller: textController, // 사용자가 입력한 값 가져오기
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.teal),
@@ -54,12 +47,28 @@ class _SearchScreenState extends State<SearchScreen> {
                 //   color: Colors.green,
                 // ),
                 // prefixText: ' ',
-                suffixText: 'USD',
-                suffixIcon: Icon(Icons.search),
+                // suffixText: 'USD',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () async {
+                    setState(() {
+                      viewModel.isLoading = true;
+                    });
+
+                    print('확인! : ${textController.text}');
+                    await viewModel.search('아이유');
+
+                    // 렌더링 다시하기
+                    setState(() {
+                      viewModel.isLoading = false;
+                    });
+                  },
+                ),
                 suffixStyle: TextStyle(color: Colors.green),
               ),
             ),
             const SizedBox(height: 16),
+            if (viewModel.isLoading) CircularProgressIndicator(),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -67,9 +76,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                 ),
-                itemCount: photos.length,
+                itemCount: viewModel.photos.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final photo = photos[index]; // final <-> var
+                  final photo = viewModel.photos[index]; // final <-> var
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),
                     child: Image.network(
